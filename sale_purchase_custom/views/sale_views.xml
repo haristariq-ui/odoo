@@ -1,0 +1,60 @@
+<odoo>
+
+    <record id="sale_order_form_custom" model="ir.ui.view">
+        <field name="name">sale.order.form.custom</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="sales_channel" widget="radio"/>
+            </xpath>
+
+            <xpath expr="//field[@name='payment_term_id']" position="after">
+
+                <field name="custom_order_type"/>
+
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list/field[@name='tax_ids']"
+            position="before">
+              <field name="custom_size"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list/field[@name='qty_delivered']" position="after">
+              <field name="discount_amount"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list/field[@name='qty_invoiced']" position="before">
+              <field name="tax_amount"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_sale_order_search_custom" model="ir.ui.view">
+      <field name="name">sale.order.search.custom</field>
+      <field name="model">sale.order</field>
+      <field name="inherit_id" ref="sale.sale_order_view_search_inherit_quotation"/>
+      <field name="arch" type="xml">
+
+         <xpath expr="//search" position="inside">
+
+            <filter
+                name="filter_marketing"
+                string="Marketing"
+                domain="[('sales_channel', '=', 'marketing')]"/>
+            <filter
+                name="filter_trade"
+                string="Trade"
+                domain="[('sales_channel', '=', 'trade')]"/>
+            <filter
+                name="filter_ecommerce"
+                string="Ecommerce"
+                domain="[('sales_channel', '=', 'ecommerce')]"/>
+             <group>
+                 <filter name="group_by_sales_channel" string="Sales Channel" context="{'group_by': 'sales_channel'}"/>
+
+             </group>
+        </xpath>
+
+      </field>
+    </record>
+
+</odoo>
