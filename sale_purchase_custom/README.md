@@ -1,338 +1,446 @@
-# Sale Purchase Custom
+# Custom Sale Order Report – Odoo 19
 
-Custom Odoo 19 module for extending the Sales Order and Customer views
-with sales-channel classification, filtering/grouping, customer invoice
-access, and additional sales-order information.
+## Project Overview
 
-## Module Overview
+This project is an Odoo 19 customization that creates a **custom Sale Order PDF report** using **QWeb**.
 
-This module extends the standard Odoo Sales functionality.
+The purpose of the customization is to generate a professional Sale Order report that displays the important information from a sales order, including custom fields added to the Sale Order and Sale Order Lines.
 
-### Implemented / Covered Features
+The report layout was designed by taking the standard Odoo Sale Order report as a reference and adjusting the alignment, spacing, typography, and table structure.
 
-1.  **Customer Invoices Smart Button**
-    -   Adds a smart button on the Customer (`res.partner`) view for
-        viewing customer invoices.
-    -   The button opens invoices related to the selected customer.
-    -   Only customer invoices (`out_invoice`) are displayed.
-    -   The action uses a domain based on `partner_id` and `move_type`.
-2.  **Sales Channel on Sales Order**
-    -   Adds a `Sales Channel` selection field to `sale.order`.
-    -   Available options:
-        -   Marketing
-        -   Trade
-        -   Ecommerce
-    -   The field is displayed as radio buttons on the Sales Order form.
-3.  **Sales Channel Filters**
-    -   Adds separate search filters for:
-        -   Marketing
-        -   Trade
-        -   Ecommerce
-    -   Each filter uses a domain on the `sales_channel` field.
-4.  **Sales Channel Group By**
-    -   Adds a `Sales Channel` Group By option to the Sales Order search
-        view.
-    -   Odoo automatically creates groups for:
-        -   Marketing
-        -   Trade
-        -   Ecommerce
-5.  **Additional Sales Order / Sales Order Line Fields**
-    -   Existing customizations also add/display:
-        -   Custom Order Type on Sales Order
-        -   Custom Size on Sales Order Line
-        -   Discount Amount on Sales Order Line
-        -   Tax Amount on Sales Order Line
+---
 
-## Sales Channel Field
+## Technologies Used
 
-The main field is:
+- **Odoo 19**
+- **Python**
+- **XML**
+- **QWeb**
+- **HTML/CSS**
+- **wkhtmltopdf** for PDF report generation
 
-``` python
-sales_channel = fields.Selection(
-    [
-        ('marketing', 'Marketing'),
-        ('trade', 'Trade'),
-        ('ecommerce', 'Ecommerce'),
-    ],
-    string='Sales Channel',
-)
+---
+
+## Main Features
+
+### 1. Custom Sale Order PDF Report
+
+A custom QWeb PDF report was created for the `sale.order` model.
+
+The report action uses:
+
+```xml
+<field name="model">sale.order</field>
+<field name="report_type">qweb-pdf</field>
 ```
 
-### Selection Value vs Label
+The report is connected to the Sale Order model through:
 
-Each selection option contains two values:
-
-``` python
-('marketing', 'Marketing')
+```xml
+<field name="binding_model_id" ref="sale.model_sale_order"/>
+<field name="binding_type">report</field>
 ```
 
--   `marketing` is the internal value stored by Odoo.
--   `Marketing` is the label displayed to the user.
+This makes the report available from the Sale Order reporting options.
 
-The same pattern is used for Trade and Ecommerce.
+---
 
-## Sales Order Form
+## 2. Sale Order Information
 
-The Sales Channel field is displayed using the radio widget:
+The report displays basic Sale Order information such as:
 
-``` xml
-<field name="sales_channel" widget="radio"/>
+- Order Number
+- Order Date
+
+Example QWeb fields:
+
+```xml
+<span t-field="doc.name"/>
+<span t-field="doc.date_order"/>
 ```
 
-This produces radio buttons on the Sales Order form:
+---
 
--   Marketing
--   Trade
--   Ecommerce
+## 3. Order Information Section
 
-The field is inserted after the customer field.
+A separate **Order Information** section was created.
 
-## Search Filters
+It displays:
 
-The module adds the following filters:
+- Customer
+- Sales Channel
+- Currency
 
-``` xml
-<filter
-    name="filter_marketing"
-    string="Marketing"
-    domain="[('sales_channel', '=', 'marketing')]"/>
+The custom `sales_channel` field is displayed using:
 
-<filter
-    name="filter_trade"
-    string="Trade"
-    domain="[('sales_channel', '=', 'trade')]"/>
-
-<filter
-    name="filter_ecommerce"
-    string="Ecommerce"
-    domain="[('sales_channel', '=', 'ecommerce')]"/>
+```xml
+<span t-field="doc.sales_channel"/>
 ```
 
-### What is a Domain?
+The customer and currency are displayed using:
 
-A domain is a condition used by Odoo to select records.
+```xml
+<span t-field="doc.partner_id"/>
+<span t-field="doc.currency_id"/>
+```
+
+The layout uses Bootstrap/QWeb `row` and `col-*` classes together with CSS styling to control alignment and spacing.
+
+---
+
+## 4. Order Items Table
+
+A custom table was created to display Sale Order Lines.
+
+The table contains:
+
+| Column | Field |
+|---|---|
+| Product | `line.product_id` |
+| Quantity | `line.product_uom_qty` |
+| Unit Price | `line.price_unit` |
+| Discount | `line.discount_amount` |
+| Tax Amount | `line.tax_amount` |
+| Subtotal Price | `line.price_subtotal` |
+
+The table was refined to improve:
+
+- Heading alignment
+- Numerical value alignment
+- Font weight
+- Spacing between rows
+- Column positioning
+- Header border
+
+Numerical columns are right-aligned to make the report easier to read.
+
+---
+
+## 5. Custom Discount and Tax Information
+
+The report displays custom financial information at the bottom.
+
+The summary contains:
+
+- Untaxed Amount
+- Total Discount
+- Taxes
+- Total
+
+Example:
+
+```xml
+<span t-field="doc.amount_untaxed"/>
+<span t-field="doc.total_discount"/>
+<span t-field="doc.amount_tax"/>
+<span t-field="doc.amount_total"/>
+```
+
+The total amount is displayed in bold.
+
+A horizontal border is placed above the summary to visually separate it from the order lines.
+
+---
+
+## 6. Sale Order Sections and Notes
+
+The report was also updated to support Sale Order sections and notes.
+
+Odoo stores sections and notes as records inside `sale.order.line`, but they are identified using the `display_type` field.
+
+The report checks:
+
+```xml
+line.display_type == 'line_section'
+```
+
+for sections and:
+
+```xml
+line.display_type == 'line_note'
+```
+
+for notes.
+
+Normal product lines are handled separately.
+
+The basic QWeb logic is:
+
+```xml
+<t t-if="line.display_type == 'line_section'">
+    <!-- Display section -->
+</t>
+
+<t t-elif="line.display_type == 'line_note'">
+    <!-- Display note -->
+</t>
+
+<t t-else="">
+    <!-- Display normal product line -->
+</t>
+```
+
+This prevents sections and notes from incorrectly appearing as product lines with empty quantities and prices.
+
+---
+
+## 7. Report Layout Improvements
+
+The report was refined based on the standard Odoo Sale Order report.
+
+The following layout issues were addressed:
+
+### Alignment
+
+Labels and values were aligned consistently.
 
 For example:
 
-``` python
-[('sales_channel', '=', 'marketing')]
-```
+- Product text is left-aligned.
+- Quantity is left-aligned.
+- Unit Price is left-aligned.
+- Discount is left-aligned.
+- Tax Amount is left-aligned.
+- Subtotal is left-aligned.
 
-means:
+### Spacing
 
-> Show only Sales Orders whose `sales_channel` value is `marketing`.
+Spacing was adjusted between:
 
-The three parts are:
+- Report headings
+- Order information
+- Order items
+- Product rows
+- Order totals
 
-``` text
-sales_channel  -> field
-=              -> operator
-marketing      -> value
-```
+### Typography
 
-## Group By
-
-The Sales Order search view also supports:
-
-``` xml
-<filter
-    name="group_by_sales_channel"
-    string="Sales Channel"
-    context="{'group_by': 'sales_channel'}"/>
-```
-
-This groups Sales Orders according to the value of the `sales_channel`
-field.
-
-The result is:
-
-``` text
-Marketing
-Trade
-Ecommerce
-```
-
-There is no need to create three separate Group By filters because
-Marketing, Trade, and Ecommerce are values of the same field.
-
-## Customer Invoice Smart Button
-
-The customer invoice action uses a domain similar to:
-
-``` python
-'domain': [
-    ('partner_id', '=', self.id),
-    ('move_type', '=', 'out_invoice'),
-],
-```
-
-This means:
-
--   `partner_id = self.id` → show invoices belonging to the selected
-    customer.
--   `move_type = out_invoice` → show customer invoices rather than
-    vendor bills.
-
-The action can also provide default values through context:
-
-``` python
-'context': {
-    'default_partner_id': self.id,
-    'default_move_type': 'out_invoice',
-},
-```
-
-### Why `res.partner`?
-
-The Customer is represented by the `res.partner` model.
-
-Invoices are related to the customer through the invoice's `partner_id`
-field. Therefore, the smart button belongs naturally on the Customer
-view and opens the related invoices.
-
-## Sales Order Custom Fields
-
-The Sales Order form customization includes:
-
-``` xml
-<field name="sales_channel" widget="radio"/>
-```
-
-and:
-
-``` xml
-<field name="custom_order_type"/>
-```
-
-The Sales Order Line customization displays fields such as:
-
-``` xml
-<field name="custom_size"/>
-<field name="discount_amount"/>
-<field name="tax_amount"/>
-```
-
-These are inserted into the existing Odoo Sales Order Line list view
-using XPath inheritance.
-
-
-## XPath
-
-XPath is used to locate an existing element in the parent view.
+Important headings and values use bold formatting where appropriate.
 
 For example:
 
-``` xml
-<xpath expr="//field[@name='partner_id']" position="after">
-    <field name="sales_channel" widget="radio"/>
-</xpath>
+```css
+font-weight: bold;
 ```
 
-This means:
+### Horizontal separators
 
-> Find the `partner_id` field and insert `sales_channel` immediately
-> after it.
+Horizontal lines are used to visually separate major sections of the report.
 
-Another example:
+---
 
-``` xml
-<xpath expr="//field[@name='payment_term_id']" position="after">
-    <field name="custom_order_type"/>
-</xpath>
+## 8. QWeb Report Structure
+
+The report follows the standard Odoo QWeb structure:
+
+```xml
+<t t-call="web.html_container">
+    <t t-foreach="docs" t-as="doc">
+        <t t-call="web.external_layout">
+
+            <div class="page">
+                <!-- Report content -->
+            </div>
+
+        </t>
+    </t>
+</t>
 ```
-## Installation / Upgrade
 
-1.  Place the module inside the configured custom addons directory.
-2.  Restart the Odoo server if required.
-3.  Open Odoo.
-4.  Enable Developer Mode.
-5.  Go to **Apps**.
-6.  Update the Apps list if the module is not visible.
-7.  Install the module.
-8.  After code changes, upgrade the module.
+### `web.html_container`
 
-## Testing Checklist
+Provides the HTML container used for the report.
 
-### Sales Order
+### `docs`
 
--   [ ] Sales Channel field is visible.
--   [ ] Marketing can be selected.
--   [ ] Trade can be selected.
--   [ ] Ecommerce can be selected.
--   [ ] Sales Channel is saved correctly.
+Contains the records for which the report is being generated.
 
-### Filters
+### `doc`
 
--   [ ] Marketing filter shows only Marketing orders.
--   [ ] Trade filter shows only Trade orders.
--   [ ] Ecommerce filter shows only Ecommerce orders.
+Represents the current Sale Order:
 
-### Group By
+```xml
+<t t-foreach="docs" t-as="doc">
+```
 
--   [ ] Group By menu contains Sales Channel.
--   [ ] Sales Orders are grouped into Marketing, Trade, and Ecommerce.
+### `web.external_layout`
 
-### Customer Invoices
+Provides the standard Odoo report layout, including company information, logo, header/footer, and page structure.
 
--   [ ] Customer view contains the Customer Invoices smart button.
--   [ ] Clicking the button opens invoices for that customer.
--   [ ] Only customer invoices are displayed.
+### `page`
 
-### Additional Fields
+Contains the actual content of the custom report.
 
--   [ ] Custom Order Type is displayed on the Sales Order.
--   [ ] Custom Size is displayed on Sales Order Lines.
--   [ ] Discount Amount is displayed on Sales Order Lines.
--   [ ] Tax Amount is displayed on Sales Order Lines.
+---
 
-## Key Odoo Concepts Used
 
-This task demonstrates:
+## 10. Reference Report
 
--   `fields.Selection`
--   `widget="radio"`
--   Search view inheritance
--   Form view inheritance
--   XPath
--   Search filters
--   Domains
--   Context
--   Group By
--   `ir.actions.act_window`
--   `res.partner`
--   `sale.order`
--   `account.move`
--   Smart buttons
--   Odoo External IDs
--   Odoo view debugging
--   Module upgrade and XML validation
+The standard Odoo Sale Order report was used as a visual reference.
 
-## Troubleshooting
+The custom report was compared against the standard report for:
 
+- Font appearance
+- Heading sizes
+- Spacing
+- Column alignment
+- Product-line layout
+- Total placement
+- Horizontal separators
+- Overall page structure
+
+The goal was not to duplicate the standard report exactly, but to follow its professional layout and alignment patterns while displaying the project's custom fields.
+
+---
+
+## 11. Files Involved
+
+The main report customization is contained in the module's XML report file.
+
+Typical structure:
+
+```text
+sale_purchase_custom/
+│
+├── __init__.py
+├── __manifest__.py
+│
+├── models/
+│   ├── __init__.py
+│   └── sale.py
+│
+└── sale_report/
+    └── sale_order_report.xml
+```
+
+---
+
+## 12. Report Action
+
+The report is registered using an `ir.actions.report` record similar to:
+
+```xml
+<record id="action_custom_sale_order_report" model="ir.actions.report">
+    <field name="name">Custom Sale Order</field>
+    <field name="model">sale.order</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">
+        sale_purchase_custom.custom_sale_order_report
+    </field>
+    <field name="report_file">
+        sale_purchase_custom.custom_sale_order_report
+    </field>
+    <field name="binding_model_id" ref="sale.model_sale_order"/>
+    <field name="binding_type">report</field>
+</record>
+```
+
+The important point is that:
+
+```xml
+<field name="model">sale.order</field>
+```
+
+specifies the Odoo model used by the report, while:
+
+```xml
+<field name="binding_model_id" ref="sale.model_sale_order"/>
+```
+
+connects the report action to the Sale Order model in Odoo's reporting interface.
+
+---
+
+## 13. Report Generation Flow
+
+The overall process is:
+
+```text
+Sale Order
+    ↓
+Report Action
+    ↓
+QWeb Template
+    ↓
+QWeb renders doc / order_line
+    ↓
+HTML Report
+    ↓
+wkhtmltopdf
+    ↓
+PDF Sale Order
+```
+
+---
+
+## 14. Key QWeb Concepts Used
+
+### `t-field`
+
+Used to display an Odoo model field:
+
+```xml
+<span t-field="doc.name"/>
+```
+
+### `t-foreach`
+
+Used to loop through Sale Order Lines:
+
+```xml
+<t t-foreach="doc.order_line" t-as="line">
+```
+
+### `t-if`
+
+Used to check whether a line is a section:
+
+```xml
+<t t-if="line.display_type == 'line_section'">
+```
+
+### `t-elif`
+
+Used for notes:
+
+```xml
+<t t-elif="line.display_type == 'line_note'">
+```
+
+### `t-else`
+
+Used for normal product lines:
+
+```xml
+<t t-else="">
+```
+
+---
+
+## 15. Current Result
+
+The custom report now provides:
+
+- Standard Odoo external layout
+- Sale Order information
+- Custom Sales Channel field
+- Customer and Currency information
+- Custom Order Items table
+- Quantity, price, discount, tax, and subtotal
+- Order financial summary
+- Proper alignment of headings and values
+- Improved spacing
+- Bold headings and important values
+- Section support
+- Note support
+- PDF generation through QWeb
+
+---
 
 ## Conclusion
 
-This customization extends Odoo Sales with a Sales Channel workflow and
-improves Sales Order navigation and reporting.
+This project demonstrates how to create and customize a **QWeb PDF report in Odoo 19**.
 
-The main workflow is:
+The implementation covers both the technical side of Odoo reporting and the presentation side, including QWeb templates, report actions, Odoo fields, Sale Order Lines, sections, notes, CSS styling, alignment, spacing, and PDF generation.
 
-``` text
-Create Sales Order
-        |
-        v
-Select Sales Channel
-        |
-   +----+----+-----------+
-   |         |           |
-Marketing   Trade    Ecommerce
-   |         |           |
-   +----+----+-----------+
-        |
-        v
-Filter / Group Sales Orders
-```
-
-The module also connects customers with their invoices through a smart
-button and extends the Sales Order/Sales Order Line views with
-additional business information.
+The report was developed by studying the standard Odoo Sale Order report and then creating a customized version containing project-specific fields and calculations.

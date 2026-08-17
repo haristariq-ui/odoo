@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <record id="action_custom_sale_order_report" model="ir.actions.report">
+        <field name="name">Custom Sale Order</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">sale_purchase_custom.custom_sale_order_report</field>
+        <field name="report_file">sale_purchase_custom.custom_sale_order_report</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
+    </record>
+    <template id="custom_sale_order_report">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family: Arial, sans-serif;
+                                color: #1f2937;
+                                font-size: 17px;">
+                         <h4 style="font-size: 30px;
+                                   font-weight: bold;
+                                   margin-bottom: 20px;">Sale Order:</h4>
+                        <div class="d-flex">
+
+                            <div style="margin-right: 10px;">
+                                <strong>Order Number:</strong>
+                            </div>
+
+                            <div style="margin-right: 200px;">
+                                <span t-field="doc.name"/>
+                            </div>
+
+                            <div style="margin-right: 10px;">
+                                <strong>Order Date:</strong>
+                            </div>
+
+                            <div>
+                                <span t-field="doc.date_order"/>
+                            </div>
+
+                        </div>
+                        <hr/>
+                        <h4 style="font-size: 30px;
+                                   font-weight: bold;
+                                   margin-bottom: 20px;">Order Information:</h4>
+                        <div style="font-size: 17px;">
+
+                            <!-- First row -->
+                            <div class="row" style="margin-bottom: 12px;">
+
+                                <div class="col-4">
+                                    <div style="font-weight: bold; margin-bottom: 4px;">
+                                        Customer
+                                    </div>
+                                    <div>
+                                        <span t-field="doc.partner_id"/>
+                                    </div>
+                                </div>
+
+                                <div class="col-4">
+                                    <div style="font-weight: bold; margin-bottom: 4px;">
+                                        Sales Channel
+                                    </div>
+                                    <div>
+                                        <span t-field="doc.sales_channel"/>
+                                    </div>
+                                </div>
+
+                                <div class="col-4">
+                                    <div style="font-weight: bold; margin-bottom: 4px;">
+                                        Currency
+                                    </div>
+                                    <div>
+                                        <span t-field="doc.currency_id"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr style="border: 0;
+                                   border-top: 1px solid #cccccc;
+                                   margin: 15px 0 20px 0;"/>
+                        <h4 style="font-size: 30px;
+                                   font-weight: bold;
+                                   margin-bottom: 20px;">Order Items:</h4>
+                        <table style="width: 100%;
+                                      border-collapse: collapse;
+                                      margin-bottom: 20px;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #1f2937;">
+                                    <th style="font-weight: bold; font-size: 17px; padding: 5px 3px; width: 25%; text-align: left">Product</th>
+                                    <th style="font-weight: bold;font-size: 17px; padding: 5px 3px; width: 7%; text-align: left">Quantity</th>
+                                    <th style="font-weight: bold;font-size: 17px; padding: 5px 3px; width: 11%; text-align: left">Unit Price</th>
+                                    <th style="font-weight: bold;font-size: 17px; padding: 5px 3px; width: 13%; text-align: left">Discount</th>
+                                    <th style="font-weight: bold;font-size: 17px; padding: 5px 3px; width: 14%; text-align: left">Tax Amount</th>
+                                    <th style="font-weight: bold;font-size: 17px; padding: 5px 3px; width: 15%; text-align: left">Subtotal price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="doc.order_line" t-as="line">
+                                     <t t-if="line.display_type == 'line_section'">
+                                        <tr>
+                                            <td colspan="6" style="
+                                                    font-weight: bold;
+                                                    padding-top: 8px;
+                                                    padding-bottom: 8px;">
+                                                <span t-field="line.name"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+
+                                    <!-- NOTE -->
+                                    <t t-elif="line.display_type == 'line_note'">
+                                        <tr>
+                                            <td colspan="6"
+                                                style="
+                                                    font-style: italic;
+                                                    padding-bottom: 6px;
+                                                   ">
+                                                <span t-field="line.name"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                  <t t-else="">
+                                    <tr>
+                                        <td style="padding: 5px 4px; font-weight: bold;">
+                                            <span t-field="line.product_id"/>
+                                        </td>
+                                        <td style="padding: 5px 4px; font-weight: bold;">
+                                            <span t-field="line.product_uom_qty"/>
+                                        </td>
+                                        <td style="padding: 5px 4px; font-weight: bold;">
+                                            <span t-field="line.price_unit"/>
+                                        </td>
+                                        <td style="padding: 5px 4px; font-weight: bold;">
+                                            <span t-field="line.discount_amount"/>
+                                        </td>
+                                        <td style="padding: 5px 4px; font-weight: bold;">
+                                            <span t-field="line.tax_amount"/>
+                                        </td>
+                                        <td style="padding: 5px 4px; font-weight: bold;">
+                                            <span t-field="line.price_subtotal"/>
+                                        </td>
+                                    </tr>
+                                  </t>
+
+                                </t>
+                            </tbody>
+                        </table>
+<!--                        order summary              -->
+                         <div class="row">
+                            <div class="col-8">
+                            </div>
+                            <div class="col-4">
+                              <div style="
+                                    border-top: 2px solid #222;
+                                    padding-top: 8px;
+                                ">
+                                 <div class="d-flex">
+                                    <div style="width: 140px;">
+                                        <strong>Untaxed Amount:</strong>
+                                    </div>
+                                    <div style="margin-left: 30px;">
+                                        <span t-field="doc.amount_untaxed"/>
+                                    </div>
+                                 </div>
+
+                                 <div class="d-flex">
+                                    <div style="width: 140px;">
+                                        <strong>Total Discount:</strong>
+                                    </div>
+                                    <div style="margin-left: 30px;">
+                                        <span t-field="doc.total_discount"/>
+                                    </div>
+                                 </div>
+                                 <div class="d-flex">
+                                    <div style="width: 140px;">
+                                        <strong>Taxes:</strong>
+                                    </div>
+                                    <div style="margin-left: 30px;">
+                                        <span t-field="doc.amount_tax"/>
+                                    </div>
+                               </div>
+                                  <div class="d-flex">
+                                    <div style="width: 140px;">
+                                        <strong>Total:</strong>
+                                    </div>
+                                    <div style="margin-left: 30px;">
+                                        <strong>
+                                            <span t-field="doc.amount_total"/>
+                                        </strong>
+                                    </div>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+
+</odoo>

@@ -11,12 +11,9 @@
             </xpath>
 
             <xpath expr="//field[@name='payment_term_id']" position="after">
-
                 <field name="custom_order_type"/>
-
             </xpath>
-            <xpath expr="//field[@name='order_line']/list/field[@name='tax_ids']"
-            position="before">
+            <xpath expr="//field[@name='order_line']/list/field[@name='tax_ids']" position="before">
               <field name="custom_size"/>
             </xpath>
             <xpath expr="//field[@name='order_line']/list/field[@name='qty_delivered']" position="after">
@@ -27,7 +24,7 @@
             </xpath>
         </field>
     </record>
-
+<!--            filters and group by                    -->
     <record id="view_sale_order_search_custom" model="ir.ui.view">
       <field name="name">sale.order.search.custom</field>
       <field name="model">sale.order</field>

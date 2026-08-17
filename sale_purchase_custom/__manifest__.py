@@ -14,6 +14,7 @@
         'views/invoice_views.xml',
         'views/stock_views.xml',
         'views/res_partner_views.xml',
+        'sale_report/sale_order_report.xml',
     ],
 
 
