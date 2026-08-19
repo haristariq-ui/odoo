@@ -1,0 +1,24 @@
+<odoo>
+    <record id="view_order_form_custom" model="ir.ui.view">
+        <field name="name">sale.order.form.custom</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <field name="partner_id" position="attributes">
+                <attribute name="readonly">confirm_</attribute>
+            </field>
+            <field name="date_order" position="attributes">
+                <attribute name="required">confirm_</attribute>
+            </field>
+            <field name="payment_term_id" position="attributes">
+                <attribute name="invisible">confirm_</attribute>
+            </field>
+           <xpath expr="//field[@name='order_line']/list/field[@name='product_uom_qty']" position="attributes">
+                <attribute name="column_invisible">parent.confirm_</attribute>
+           </xpath>
+
+        </field>
+
+    </record>
+</odoo>
