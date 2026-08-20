@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_partner_form_inherit_customer_statement" model="ir.ui.view">
+        <field name="name">res.partner.form.customer.statement</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Customer Statement">
+                    <field name="statement_line_ids" nolabel="1">
+                        <list>
+                            <field name="number"/>
+                            <field name="invoice_date"/>
+                            <field name="invoice_total"/>
+                            <field name="previous_balance"/>
+                            <field name="total_payments"/>
+                            <field name="current_balance"/>
+                        </list>
+                    </field>
+                    <group>
+                        <field name="total_amount_due" readonly="1"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
