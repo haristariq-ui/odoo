@@ -1,0 +1,24 @@
+<odoo>
+    <record id="view_picking_form_installed_equipment" model="ir.ui.view">
+        <field name="name">view.picking.form.installed.equipment</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="installed equipment">
+                     <field name="installed_equipment_ids">
+                        <list editable="bottom">
+                            <field name="product_id"/>
+                            <field name="lot_id"/>
+                            <field name="sale_order_id"/>
+                            <field name="rec_d_into_inventory"/>
+                            <field name="installed_at_current_location"/>
+                            <field name="installation_date"/>
+                            <field name="delivery_order_id"/>
+                        </list>
+                     </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
