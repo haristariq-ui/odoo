@@ -1,0 +1,13 @@
+<odoo>
+    <record id="view_product_pricelist_form_exchange_rate" model="ir.ui.view">
+        <field name="name">product.pricelist.form.exchange.rate</field>
+        <field name="model">product.pricelist.item</field>
+        <field name="inherit_id" ref="product.product_pricelist_item_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='currency_id']" position="after">
+                <field
+                    name="exchange_rate" invisible="compute_price != 'formula'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
