@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <record id="view_contact_history_list" model="ir.ui.view">
+        <field name="name">contact.history.list</field>
+        <field name="model">contact.history</field>
+        <field name="arch" type="xml">
+            <list string="Contacts History">
+                <field name="partner_id" string="Partner Name"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_contact_history_form" model="ir.ui.view">
+        <field name="name">contact.history.form</field>
+        <field name="model">contact.history</field>
+        <field name="arch" type="xml">
+            <form string="Contacts History">
+                <sheet>
+                    <group>
+                        <field name="partner_id"/>
+                    </group>
+
+                    <separator string="History"/>
+                    <field name="history_line_ids" nolabel="1" readonly="1">
+                        <list>
+                            <field name="sale_order_id" string="Source Document"/>
+                            <field name="product_id" string="Product Name"/>
+                            <field name="description" string="Description"/>
+                            <field name="unit_price" string="Unit Price"/>
+                            <field name="product_quantity" string="Product Quantity"/>
+                        </list>
+                    </field>
+                    <separator string="Invoices"/>
+                    <field name="invoice_ids" nolabel="1" readonly="1">
+                        <list>
+                            <field name="name" string="Invoice"/>
+                            <field name="invoice_date" string="Invoice Date"/>
+                            <field name="amount_total" string="Total"/>
+                            <field name="state" string="Status"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_contact_history" model="ir.actions.act_window">
+        <field name="name">Contacts History</field>
+        <field name="res_model">contact.history</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_server_sync_contact_history" model="ir.actions.server">
+        <field name="name">Sync Contact History</field>
+        <field name="model_id" ref="model_contact_history"/>
+        <field name="binding_model_id" ref="model_contact_history"/>
+        <field name="binding_view_types">form</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_sync_history()</field>
+    </record>
+    <menuitem
+        id="menu_contact_history"
+        name="Contact History"
+        parent="contacts.res_partner_menu_config"
+        action="action_contact_history"
+        sequence="50"
+    />
+
+</odoo>
