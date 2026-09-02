@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="module_category_library" model="ir.module.category">
+        <field name="name">Library</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="library_privilege" model="res.groups.privilege">
+        <field name="name">Library</field>
+        <field name="category_id" ref="library_management.module_category_library"/>
+    </record>
+
+    <record id="group_library_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="privilege_id" ref="library_management.library_privilege"/>
+    </record>
+
+    <record id="group_library_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="privilege_id" ref="library_management.library_privilege"/>
+        <field name="implied_ids" eval="[Command.link(ref('library_management.group_library_user'))]"/>
+    </record>
+</odoo>
