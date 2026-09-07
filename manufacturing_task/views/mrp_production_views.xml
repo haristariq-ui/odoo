@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <record id="mrp_production_form_custom" model="ir.ui.view">
+        <field name="name">mrp.production.form.custom</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+             <xpath expr="//header" position="inside">
+                <button
+                    name="action_print_bom_label"
+                    string="Download"
+                    type="object"
+                    class="btn-primary"/>
+            </xpath>
+             <xpath expr="//div[@name='bom_div']" position="after">
+                <field name="customer_name"/>
+                <field name="invoice_address"/>
+                <field name="delivery_address"/>
+                <field name="unit_number"/>
+                <field name="script_done"/>
+                <field name="done_mo"/>
+            </xpath>
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="sale_order_id"/>
+                <field name="barcode_labels_qty"/>
+                <field name="effective_date"/>
+                <field name="tentative_temp_date"/>
+                <field name="airtable"/>
+                <field name="remarks"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

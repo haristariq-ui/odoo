@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="paperformat_bom_label" model="report.paperformat">
+        <field name="name">BOM Label</field>
+        <field name="default" eval="False"/>
+        <field name="format">custom</field>
+        <field name="page_width">101</field>
+        <field name="page_height">152</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">4</field>
+        <field name="margin_bottom">8</field>
+        <field name="margin_left">1</field>
+        <field name="margin_right">1</field>
+        <field name="dpi">90</field>
+    </record>
+</odoo>

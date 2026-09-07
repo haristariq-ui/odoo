@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <template id="report_bom_label">
+        <t t-call="web.basic_layout">
+            <t t-foreach="docs" t-as="o">
+                <t t-foreach="range(o.barcode_labels_qty or 1)" t-as="i">
+                    <div class="page"
+                             style="
+                                position: relative;
+                                width: 99mm;
+                                height: 148mm;
+                                overflow: hidden;
+                                page-break-after: always;
+                                page-break-inside: avoid;
+                                font-family: Arial, sans-serif;
+                                font-size: 13px;
+                                box-sizing: border-box;
+                                padding: 4mm;
+                        ">
+                     <div style="
+                            position:absolute;
+                            top:4mm;
+                            left:4mm;
+                            font-size:24px;
+                            font-weight:bold;
+                        ">
+                            <span t-esc="o.name"/>
+                     </div>
+
+                        <div t-if="o.sale_order_id"
+                             style="
+                                position: absolute;
+                                top: 0;
+                                right: 0;
+                                width: 43%;
+                                text-align: center;
+                             ">
+                            <div>
+                                <span
+                                    t-field="o.sale_order_id.name"
+                                    t-options="{
+                                        'widget': 'barcode',
+                                        'symbology': 'Code128',
+                                        'img_style': 'width: 230px; height: 55px;'
+                                    }"
+                                />
+                            </div>
+                            <div style="
+                                font-size: 16px;
+                                font-weight: bold;
+                                margin-top: 2px;
+                            ">
+                                Order:
+                                <span t-esc="o.sale_order_id.name"/>
+                            </div>
+
+                        </div>
+                        <div style="
+                                padding-top:32mm;
+                                font-size:13px;
+                            ">
+                            <strong>Bill To:</strong>
+                            <br/>
+                            <span t-esc="o.customer_name or ''"/>
+                        </div>
+                        <div style="
+                            margin-top: 12px;
+                            font-size: 13px;
+                        ">
+                            <strong>Ship To:</strong>
+                            <br/>
+                            <span t-esc="o.delivery_address or ''"/>
+                        </div>
+                        <div t-if="o.unit_number"
+                             style="
+                                position: absolute;
+                                top: 125px;
+                                right: 25px;
+                                font-size: 13px;
+                             ">
+                            <strong>SF:</strong>
+                            <span t-esc="o.unit_number"/>
+                        </div>
+                        <div style="
+                            margin-top: 10px;
+                            margin-left: 15px;
+                            font-size: 14px;
+                        ">
+                            <t t-foreach="o.move_raw_ids" t-as="move">
+                                <div style="
+                                    margin-bottom: 3px;
+                                    font-weight: bold;
+                                ">
+                                    <span t-esc="move.product_id.display_name"/>
+                                </div>
+                            </t>
+                        </div>
+                        <div style="
+                            margin-top: 5px;
+                            font-size: 18px;
+                            font-weight: bold;
+                        ">
+                            <t t-if="o.product_id.default_code">
+                                <span t-esc="o.product_id.default_code"/>
+                                -
+                                <span t-esc="o.product_id.name"/>
+                            </t>
+                            <t t-else="">
+                                <span t-esc="o.product_id.name"/>
+                            </t>
+                        </div>
+                        <div style="
+                            position: absolute;
+                            bottom: 2px;
+                            left: 10px;
+                            font-size: 18px;
+                            font-weight: bold;
+                        ">
+                            LABEL:
+                            <span t-esc="i + 1"/>
+                            /
+                            <span t-esc="o.barcode_labels_qty or 1"/>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

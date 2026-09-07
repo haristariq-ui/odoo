@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+    <record id="action_report_bom_label" model="ir.actions.report">
+        <field name="name">BOM Label</field>
+        <field name="model">mrp.production</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">manufacturing_task.report_bom_label</field>
+        <field name="report_file">manufacturing_task.report_bom_label</field>
+        <field name="paperformat_id" ref="manufacturing_task.paperformat_bom_label"/>
+    </record>
+</odoo>
