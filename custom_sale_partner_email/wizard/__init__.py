@@ -1,0 +1,1 @@
+from . import sale_partner_email_wizard
