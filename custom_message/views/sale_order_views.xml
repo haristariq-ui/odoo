@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sale_order_form_custom_message" model="ir.ui.view">
+        <field name="name">sale.order.form.custom.message</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='note']" position="after">
+                <field name="custom_message"/>
+            </xpath>
+        </field>
+
+    </record>
+
+</odoo>
