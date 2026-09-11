@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <record id="view_school_student_report_search" model="ir.ui.view">
+        <field name="name">school.student.report.search</field>
+        <field name="model">school.student.report</field>
+        <field name="arch" type="xml">
+            <search string="Student Analysis">
+                <field name="gender"/>
+                <field name="class_name"/>
+                <field name="state"/>
+                <field name="admission_date"/>
+            </search>
+        </field>
+    </record>
+    <record id="view_school_student_report_list" model="ir.ui.view">
+        <field name="name">school.student.report.list</field>
+        <field name="model">school.student.report</field>
+        <field name="arch" type="xml">
+            <list string="Student Analysis">
+                <field name="class_name"/>
+                <field name="gender"/>
+                <field name="state"/>
+                <field name="admission_date"/>
+                <field name="student_count" sum="Total Students"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_school_student_report_pivot" model="ir.ui.view">
+        <field name="name">school.student.report.pivot</field>
+        <field name="model">school.student.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Student Analysis">
+                <field name="class_name" type="row"/>
+                <field name="gender" type="col"/>
+                <field name="state" type="row"/>
+                <field name="student_count" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="view_school_student_report_graph" model="ir.ui.view">
+        <field name="name">school.student.report.graph</field>
+        <field name="model">school.student.report</field>
+        <field name="arch" type="xml">
+            <graph string="Students by Class" type="bar">
+                <field name="class_name"/>
+                <field name="student_count" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    <record id="action_school_student_report" model="ir.actions.act_window">
+        <field name="name">Student Analysis</field>
+        <field name="res_model">school.student.report</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="search_view_id" ref="view_school_student_report_search"/>
+    </record>
+    <menuitem
+        id="menu_school_student_reporting"
+        name="Reporting"
+        parent="menu_school_root"
+        sequence="20"
+    />
+    <menuitem
+        id="menu_school_student_analysis"
+        name="Student Analysis"
+        parent="menu_school_student_reporting"
+        action="action_school_student_report"
+        sequence="10"
+    />
+</odoo>
