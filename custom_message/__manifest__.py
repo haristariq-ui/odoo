@@ -6,6 +6,7 @@
     ],
     'data': [
         'views/sale_order_views.xml',
+        'views/mail_template.xml',
 
     ],
     'installable': True,
