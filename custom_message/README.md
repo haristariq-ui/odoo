@@ -2,24 +2,142 @@
 
 ## Overview
 
-**Custom Message on Email in Sale** is an Odoo module that extends the standard **Sales Order** functionality by allowing users to add a custom message to a sale order.
+This Odoo module adds a **Custom Message** field to Sale Orders and automatically includes that message in the email body when the standard **Sales Order Confirmation** email template is used.
 
-When the sale order confirmation email is sent, the custom message is automatically included in the email along with the standard order confirmation details.
-
-The module also attaches the standard **Sale Order PDF report** to the confirmation email.
+The purpose of this module is to allow sales users to write an order-specific message that is automatically added to the confirmation email without modifying the original Odoo email template.
 
 ---
 
 ## Features
 
 - Adds a **Custom Message** field to the Sale Order form.
-- Allows users to enter additional instructions, notes, or messages for the customer.
-- Automatically includes the custom message in the sale order confirmation email.
-- Displays the customer's name in the email.
-- Displays the sale order reference and total order amount.
-- Uses the responsible salesperson/company email as the sender.
-- Automatically attaches the standard Sale Order PDF report.
-- Automatically deletes generated email records after sending.
+- Displays the field after the existing **Note** field.
+- Automatically appends the custom message to the email body.
+- Works specifically with Odoo's standard **Sales Order Confirmation** email template.
+- Supports multiple lines in the custom message.
+- Converts line breaks into HTML `<br/>` tags.
+- Escapes user-entered text to prevent unwanted HTML from being rendered.
+- Does not affect other email templates or models.
+
+---
+
+## How It Works
+
+The workflow is simple:
+
+1. Open a **Sale Order**.
+2. Enter a message in the **Custom Message** field.
+3. Confirm/send the Sale Order confirmation email.
+4. Odoo opens the standard email composer.
+5. The module detects that the standard **Sales Order Confirmation** template is being used.
+6. The custom message is retrieved from the Sale Order.
+7. The message is appended to the existing email body.
+8. The customer receives the standard confirmation email with the custom message included.
+
+### Example
+
+Suppose the Sale Order contains:
+
+**Custom Message:**
+
+```text
+Thank you for your order.
+
+Your items will be delivered within 3-5 working days.
+```
+
+The email body will contain the existing Odoo confirmation content followed by:
+
+**Custom Message:**
+
+Thank you for your order.
+
+Your items will be delivered within 3-5 working days.
+
+---
+
+## Technical Implementation
+
+### 1. Sale Order Extension
+
+The `sale.order` model is inherited and a new Text field is added:
+
+```python
+custom_message = fields.Text(
+    string='Custom Message'
+)
+```
+
+This field stores the message entered by the sales user.
+
+---
+
+### 2. Sale Order Form View
+
+The Sale Order form is inherited and the Custom Message field is placed after the existing `note` field:
+
+```xml
+<xpath expr="//field[@name='note']" position="after">
+    <field name="custom_message"/>
+</xpath>
+```
+
+This allows users to enter the message directly from the Sale Order.
+
+---
+
+### 3. Email Composer Customization
+
+The `mail.compose.message` model is inherited and `_compute_body()` is extended.
+
+The module first calls:
+
+```python
+super()._compute_body()
+```
+
+This ensures that Odoo generates the normal email body first.
+
+The code then checks:
+
+- Whether the standard Sale Order Confirmation template exists.
+- Whether the selected template is the standard Sale Order Confirmation template.
+- Whether the composer model is `sale.order`.
+- Whether exactly one Sale Order is being processed.
+- Whether the Sale Order exists.
+- Whether a Custom Message has been entered.
+
+Only when all these conditions are satisfied is the custom message added.
+
+---
+
+## Security and HTML Handling
+
+The custom message is processed using:
+
+```python
+escape(sale_order.custom_message)
+```
+
+This escapes HTML-sensitive characters entered by the user.
+
+For example, text such as:
+
+```html
+<b>Hello</b>
+```
+
+will not be interpreted as HTML formatting.
+
+Line breaks are converted into HTML line breaks:
+
+```python
+.replace('\n', Markup('<br/>'))
+```
+
+This ensures that a multi-line message maintains its formatting inside the HTML email.
+
+`Markup` is used to safely construct the HTML section that is appended to the existing email body.
 
 ---
 
@@ -28,194 +146,18 @@ The module also attaches the standard **Sale Order PDF report** to the confirmat
 A typical module structure is:
 
 ```text
-custom_sale_email/
+custom_message_on_sale/
 │
 ├── __init__.py
 ├── __manifest__.py
 │
 ├── models/
 │   ├── __init__.py
-│   └── sale_order.py
+│   ├── sale_order.py
+│   └── mail_compose_message.py
 │
-├── views/
-│   └── sale_order_views.xml
-│
-├── data/
-│   └── mail_template.xml
-│
-└── README.md
-```
-
----
-
-## Main Components
-
-### 1. Custom Message Field
-
-The module inherits the standard `sale.order` model and adds a new Text field:
-
-```python
-custom_message = fields.Text(
-    string='Custom Message'
-)
-```
-
-This field allows users to enter any additional message that should be sent to the customer.
-
----
-
-### 2. Sale Order Form View
-
-The **Custom Message** field is added to the Sale Order form after the existing `note` field.
-
-```xml
-<xpath expr="//field[@name='note']" position="after">
-    <field name="custom_message"/>
-</xpath>
-```
-
-This makes the field available directly from the Sale Order interface.
-
----
-
-### 3. Email Template
-
-The module creates a custom email template for Sale Orders:
-
-```xml
-<field name="model_id" ref="sale.model_sale_order"/>
-```
-
-The template is linked to the `sale.order` model and contains dynamic information such as:
-
-- Company name
-- Customer name
-- Sale order reference
-- Order total
-- Salesperson name
-- Custom message
-
-Dynamic Odoo expressions such as:
-
-```xml
-<t t-out="object.partner_id.name or ''"/>
-```
-
-are used to retrieve information from the current Sale Order.
-
----
-
-### 4. Custom Message in Email
-
-The custom message is displayed only when the Sale Order contains a message:
-
-```xml
-<div t-if="object.custom_message">
-```
-
-If the field is empty, the **Custom Message** section will not appear in the email.
-
-This keeps the email clean when no additional message has been provided.
-
----
-
-### 5. Sale Order PDF Attachment
-
-The standard Odoo Sale Order report is attached to the email using:
-
-```xml
-<field name="report_template_ids"
-       eval="[(4, ref('sale.action_report_saleorder'))]"/>
-```
-
-Therefore, the customer receives the Sale Order PDF along with the confirmation email.
-
----
-
-## Installation
-
-1. Copy the module into your Odoo custom addons directory.
-
-2. Restart the Odoo server.
-
-3. Enable **Developer Mode**.
-
-4. Go to:
-
-```text
-Apps → Update Apps List
-```
-
-5. Search for:
-
-```text
-Custom message on email in sale
-```
-
-6. Click **Install**.
-
----
-
-## How to Use
-
-### Step 1 — Create a Sale Order
-
-Go to:
-
-```text
-Sales → Orders → Quotations
-```
-
-Create a new quotation or open an existing Sale Order.
-
-### Step 2 — Add a Custom Message
-
-Enter your required message in the **Custom Message** field.
-
-For example:
-
-```text
-Please make sure the order is delivered before Friday.
-```
-
-### Step 3 — Confirm the Sale Order
-
-Confirm the quotation to convert it into a Sale Order.
-
-### Step 4 — Send the Confirmation Email
-
-Use the standard Odoo email action to send the order confirmation.
-
-The customer will receive an email containing:
-
-- Customer greeting
-- Order reference
-- Order total
-- Confirmation message
-- Salesperson/company details
-- Custom Message
-- Sale Order PDF attachment
-
----
-
-## Example Email
-
-```text
-Hello John,
-
-Your order SO001 amounting to $1,500.00 has been confirmed.
-
-Thank you for your trust!
-
-Do not hesitate to contact us if you have any questions.
-
-Best regards,
-Salesperson Name
-Your Company
-
-Custom Message:
-
-Please make sure the order is delivered before Friday.
+└── views/
+    └── sale_order_views.xml
 ```
 
 ---
@@ -230,60 +172,58 @@ This module depends on:
 ]
 ```
 
-The `sale_management` module provides the required Sale Order functionality.
+The `sale_management` module provides the Sale Order functionality and the standard Sale Order Confirmation email template used by this customization.
 
 ---
 
-## Technical Details
+## Installation
 
-### Model Extended
-
-```text
-sale.order
-```
-
-### Field Added
-
-```text
-custom_message
-```
-
-**Type:** Text
-
-### View Inherited
-
-```text
-sale.view_order_form
-```
-
-### Email Template Model
-
-```text
-sale.order
-```
-
-### Attached Report
-
-```text
-sale.action_report_saleorder
-```
+1. Copy the module into your Odoo `custom_addons` directory.
+2. Restart the Odoo server.
+3. Activate **Developer Mode**.
+4. Go to **Apps**.
+5. Click **Update Apps List**.
+6. Search for **Custom message on email in sale**.
+7. Install the module.
 
 ---
 
-## Configuration
+## Important Behavior
 
-No additional configuration is required.
+The custom message is **not added to every email**.
 
-After installation, the **Custom Message** field becomes available on Sale Orders and the custom email template is loaded automatically.
+It is added only when:
+
+- The email template is `sale.mail_template_sale_confirmation`.
+- The email is being composed for a `sale.order`.
+- Exactly one Sale Order is being processed.
+- The Sale Order contains a Custom Message.
+
+Therefore, other email templates and unrelated email composers continue to work normally.
 
 ---
 
-## Compatibility
+## Manifest
 
-This module is designed for **Odoo 19** and uses standard Odoo models, XML views, email templates, and QWeb expressions.
+The module is configured as:
 
----
+```python
+{
+    'name': 'Custom message on email in sale',
+    'version': '1.0',
+    'depends': [
+        'sale_management',
+    ],
+    'data': [
+        'views/sale_order_views.xml',
+    ],
+    'installable': True,
+    'application': False,
+}
+```
 
-## License
+## Summary
 
-This module is intended for educational and development purposes.
+This module provides a simple and reusable way to attach **order-specific messages** to standard Sale Order Confirmation emails.
+
+Instead of creating or duplicating the entire Odoo email template, it keeps the standard template intact and dynamically appends the Custom Message when the email composer is generated.

@@ -6,7 +6,7 @@
     ],
     'data': [
         'views/sale_order_views.xml',
-        'data/mail_template.xml',
+
     ],
     'installable': True,
     'application': False,
