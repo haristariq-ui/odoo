@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <menuitem
+        id="menu_salary_timesheet"
+        name="Salary Timesheet"
+        parent="hr_timesheet.menu_timesheets_reports"
+        action="action_salary_timesheet_wizard"
+        sequence="20"
+    />
+
+</odoo>
